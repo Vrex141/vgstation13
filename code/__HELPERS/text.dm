@@ -15,20 +15,10 @@
 
 // Run all strings to be used in an SQL query through this proc first to properly escape out injection attempts.
 /proc/sanitizeSQL(var/t as text)
-	//var/sanitized_text = replacetext(t, "'", "\\'")
-	//sanitized_text = replacetext(sanitized_text, "\"", "\\\"")
+	var/sanitized_text = replacetext(t, "'", "\\'")
+	sanitized_text = replacetext(sanitized_text, "\"", "\\\"")
+	return sanitized_text
 
-	var/sqltext = dbcon.Quote(t)
-	//testing("sanitizeSQL(): BEFORE copytext(): [sqltext]")
-	sqltext = copytext(sqltext, 2, lentext(sqltext))//Quote() adds quotes around input, we already do that
-	//testing("sanitizeSQL(): AFTER copytext(): [sqltext]")
-	return sqltext
-
-/*
-/mob/verb/SanitizeTest(var/t as text)
-	src << "IN: [t]"
-	src << "OUT: [sanitizeSQL(t)]"
-*/
 /*
  * Text sanitization
  */
@@ -45,17 +35,38 @@
 	return t
 
 //Removes a few problematic characters
-/proc/sanitize_simple(var/t,var/list/repl_chars = list("\n"="#","\t"="#","ï¿½"="ï¿½"))
+/proc/sanitize_simple(var/t,var/list/repl_chars = list("\n"="#","\t"="#","ï¿½"="ï¿½","ÿ"="____255_"))
 	for(var/char in repl_chars)
 		var/index = findtext(t, char)
 		while(index)
 			t = copytext(t, 1, index) + repl_chars[char] + copytext(t, index+1)
 			index = findtext(t, char)
+	t = html_encode(t)
+	var/index = findtext(t, "____255_")
+	while(index)
+		t = copytext(t, 1, index) + "&#255;" + copytext(t, index+8)
+		index = findtext(t, "____255_")
+	return t
+
+/proc/sanitize_simple_uni(var/t,var/list/repl_chars = list("\n"="#","\t"="#","ÿ"="____255_"))
+	for(var/char in repl_chars)
+		var/index = findtext(t, char)
+		while(index)
+			t = copytext(t, 1, index) + repl_chars[char] + copytext(t, index+1)
+			index = findtext(t, char)
+	t = html_encode(t)
+	var/index = findtext(t, "____255_")
+	while(index)
+		t = copytext(t, 1, index) + "&#1103;" + copytext(t, index+8)
+		index = findtext(t, "____255_")
 	return t
 
 //Runs byond's sanitization proc along-side sanitize_simple
 /proc/sanitize(var/t,var/list/repl_chars = null)
-	return html_encode(sanitize_simple(t,repl_chars))
+	return sanitize_simple(t,repl_chars)
+
+/proc/sanitize_uni(var/t,var/list/repl_chars = null)
+	return sanitize_simple(t,repl_chars)
 
 //Runs sanitize and strip_html_simple
 //I believe strip_html_simple() is required to run first to prevent '<' from displaying as '&lt;' after sanitize() calls byond's html_encode()
@@ -65,7 +76,7 @@
 //Runs byond's sanitization proc along-side strip_html_simple
 //I believe strip_html_simple() is required to run first to prevent '<' from displaying as '&lt;' that html_encode() would cause
 /proc/adminscrub(var/t,var/limit=MAX_MESSAGE_LEN)
-	return copytext((html_encode(strip_html_simple(t))),1,limit)
+	return copytext((sanitize(strip_html_simple(t))),1,limit)
 
 
 //Returns null if there is any bad text in the string
@@ -204,6 +215,7 @@ proc/checkhtml(var/t)
 /*
  * Text modification
  */
+
 /proc/replacetext(text, find, replacement)
 	var/find_len = length(find)
 	if(find_len < 1)	return text
