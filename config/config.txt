@@ -16,7 +16,7 @@ ADMIN_LEGACY_SYSTEM
 BAN_LEGACY_SYSTEM
 
 ## Add a # here if you wish to use the setup where jobs have more access. This is intended for servers with low populations - where there are not enough players to fill all roles, so players need to do more than just one job. Also for servers where they don't want people to hide in their own departments.
-JOBS_HAVE_MINIMAL_ACCESS
+#JOBS_HAVE_MINIMAL_ACCESS
 
 ## Unhash this entry to have certain jobs require your account to be at least a certain number of days old to select. You can configure the exact age requirement for different jobs by editing
 ## the minimal_player_age variable in the files in folder /code/game/jobs/job/.. for the job you want to edit. Set minimal_player_age to 0 to disable age requirement for that job.
@@ -82,22 +82,22 @@ PROBABILITY EXTENDED 0
 PROBABILITY TRAITOR 2
 PROBABILITY METEOR 0
 PROBABILITY MALFUNCTION 2
-PROBABILITY BLOB 2
-PROBABILITY NUCLEAR 0
+PROBABILITY BLOB 1
+PROBABILITY NUCLEAR 1
 PROBABILITY SANDBOX 0
-PROBABILITY WIZARD 0
+PROBABILITY WIZARD 1
 PROBABILITY RESTRUCTURING 0
-PROBABILITY REVOLUTION 5
-PROBABILITY CHANGELING 0
+PROBABILITY REVOLUTION 1
+PROBABILITY CHANGELING 1
 PROBABILITY CULT 1
 PROBABILITY MONKEY 0
-PROBABILITY TRAITORCHAN 0
-PROBABILITY EXTEND-A-TRAITORMONGOUS 0
+PROBABILITY TRAITORCHAN 1
+PROBABILITY EXTEND-A-TRAITORMONGOUS 2
 PROBABILITY EPIDEMIC 1
-PROBABILITY MEME 0
-PROBABILITY HEIST 0
+PROBABILITY MEME 2
+PROBABILITY HEIST 1
 PROBABILITY MIXED 0
-PROBABILITY RAGINMAGES 0
+PROBABILITY RAGINMAGES 1
 
 ## Hash out to disable random events during the round.
 ALLOW_RANDOM_EVENTS

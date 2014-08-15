@@ -12,7 +12,7 @@ Medical Doctor=5
 Geneticist=2
 Virologist=1
 
-Scientist=3
+Scientist=4
 Chemist=2
 
 Bartender=1
@@ -27,11 +27,11 @@ Detective=1
 Security Officer=5
 
 Assistant=-1
-Atmospheric Technician=4
+Atmospheric Technician=3
 Cargo Technician=3
 Chaplain=1
 Lawyer=2
 Librarian=1
 
 AI=1
-Cyborg=1
+Cyborg=2

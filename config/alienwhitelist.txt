@@ -2,10 +2,23 @@
 ckey - diona
 
 # Whitelist one ckey for multiple species ("All" also works)
-pomf123 - unathi, diona
+spaint - all
+vrex141 - all
+flerm - all
+kaligin - all
+nitaxe - all
+agnizab - all
+demonbykov - all
+flerm - all
+labal - all
+endlessflower - all
+dudeofbro - all
+solarman - all
+morganflow - all
+microman8v - all
 
 # Whitelist one species for everyone:
-* - vox
+* - grey
 
 # Whitelist unathi for everyone IF they're a janitor:
 job=janitor - unathi
