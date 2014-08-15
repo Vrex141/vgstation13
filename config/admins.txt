@@ -7,3 +7,4 @@
 
 vrex141 - Game Master
 spaint - Game Master
+nitaxe - Game Admin

@@ -82,7 +82,7 @@
 	var/vgws_base_url = "http://vg13.undo.it" // No hanging slashes.
 	var/forumurl = "http://baystation12.net/forums/"
 
-	var/media_base_url = "" // http://ss13.nexisonline.net/media
+	var/media_base_url = "http://ss13.nexisonline.net/media" // http://ss13.nexisonline.net/media
 
 	//Alert level description
 	var/alert_desc_green = "All threats to the station have passed. Security may not have weapons visible, privacy laws are once again fully enforced."
