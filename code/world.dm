@@ -248,8 +248,7 @@
 
 	// AUTOFIXED BY fix_string_idiocy.py
 	// C:\Users\Rob\Documents\Projects\vgstation13\code\world.dm:235: s += "<b>[station_name()]</b>";
-	s += {"<b>[station_name()]</b>"
-		()"}
+	s += {"<b>[station_name()]</b>""}
 	// END AUTOFIX
 	var/list/features = list()
 
