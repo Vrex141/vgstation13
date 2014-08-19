@@ -272,7 +272,7 @@
 		*/
 
 		t = replacetext(t, "\n", "<BR>")
-		t = parsepencode(t, i, usr, iscrayon) // Encode everything from pencode to html
+		t = parsepencode(sanitize(t), i, usr, iscrayon) // Encode everything from pencode to html
 
 		if(id!="end")
 			addtofield(text2num(id), t) // He wants to edit a field, let him.
