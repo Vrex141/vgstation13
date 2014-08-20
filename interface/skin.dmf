@@ -120,6 +120,10 @@ macro "macro"
 		command = "Invisimin"
 		is-disabled = false
 	elem 
+		name = "F9"
+		command = "asay"
+		is-disabled = false
+	elem 
 		name = "F12"
 		command = "F12"
 		is-disabled = false
@@ -360,6 +364,10 @@ macro "hotkeymode"
 	elem 
 		name = "F8"
 		command = "Invisimin"
+		is-disabled = false
+	elem 
+		name = "F9"
+		command = "asay"
 		is-disabled = false
 	elem 
 		name = "F12"

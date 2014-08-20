@@ -226,6 +226,9 @@
 
 
 		t = replacetext(t, "\n", "<BR>")
+<<<<<<< HEAD
+		t = parsepencode(sanitize(t), i, usr, iscrayon) // Encode everything from pencode to html
+=======
 
 		if(istype(i,/obj/item/weapon/pen))
 			//t = parsepencode(t, i, usr, iscrayon) // Encode everything from pencode to html
@@ -235,6 +238,7 @@
 		else if(istype(i,/obj/item/toy/crayon))
 			var/obj/item/toy/crayon/C=i
 			t=C.Format(usr,t)
+>>>>>>> 2e76eada1e2d7fa498644e0aa2871fd32ec0782e
 
 		if(id!="end")
 			addtofield(text2num(id), t) // He wants to edit a field, let him.
