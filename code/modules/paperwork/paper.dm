@@ -17,6 +17,8 @@
 	slot_flags = SLOT_HEAD
 	body_parts_covered = HEAD
 	attack_verb = list("slapped")
+	autoignition_temperature = AUTOIGNITION_PAPER
+	fire_fuel = 10
 
 	var/info		//What's actually written on the paper.
 	var/info_links	//A different version of the paper which includes html links at fields and EOF
@@ -26,9 +28,7 @@
 	var/rigged = 0
 	var/spam_flag = 0
 
-	var/const/deffont = "Verdana"
-	var/const/signfont = "Times New Roman"
-	var/const/crayonfont = "Comic Sans MS"
+	var/log=""
 
 //lipstick wiping is in code/game/objects/items/weapons/cosmetics.dm!
 
@@ -143,9 +143,10 @@
 	info_links = info
 	var/i = 0
 	for(i=1,i<=fields,i++)
-		addtofield(i, "<font face=\"[deffont]\"><A href='?src=\ref[src];write=[i]'>write</A></font>", 1)
-	info_links = info_links + "<font face=\"[deffont]\"><A href='?src=\ref[src];write=end'>write</A></font>"
-
+		addtofield(i, "<A href='?src=\ref[src];write=[i]'>write</A> ", 1)
+		addtofield(i, "<A href='?src=\ref[src];help=[i]'>help</A> ", 1)
+	info_links +="<A href='?src=\ref[src];write=end'>write</A> "
+	info_links +="<A href='?src=\ref[src];help=end'>help</A> "
 
 /obj/item/weapon/paper/proc/clearpaper()
 	info = null
@@ -156,43 +157,9 @@
 	update_icon()
 
 
-/obj/item/weapon/paper/proc/parsepencode(var/t, var/obj/item/weapon/pen/P, mob/user as mob, var/iscrayon = 0)
+/obj/item/weapon/paper/proc/parsepencode(var/t, var/obj/item/weapon/pen/P, mob/user as mob)
 //	t = copytext(sanitize(t),1,MAX_MESSAGE_LEN)
-
-	t = replacetext(t, "\[center\]", "<center>")
-	t = replacetext(t, "\[/center\]", "</center>")
-	t = replacetext(t, "\[br\]", "<BR>")
-	t = replacetext(t, "\[b\]", "<B>")
-	t = replacetext(t, "\[/b\]", "</B>")
-	t = replacetext(t, "\[i\]", "<I>")
-	t = replacetext(t, "\[/i\]", "</I>")
-	t = replacetext(t, "\[u\]", "<U>")
-	t = replacetext(t, "\[/u\]", "</U>")
-	t = replacetext(t, "\[large\]", "<font size=\"4\">")
-	t = replacetext(t, "\[/large\]", "</font>")
-	t = replacetext(t, "\[sign\]", "<font face=\"[signfont]\"><i>[user.real_name]</i></font>")
-	t = replacetext(t, "\[field\]", "<span class=\"paper_field\"></span>")
-
-	if(!iscrayon)
-		t = replacetext(t, "\[*\]", "<li>")
-		t = replacetext(t, "\[hr\]", "<HR>")
-		t = replacetext(t, "\[small\]", "<font size = \"1\">")
-		t = replacetext(t, "\[/small\]", "</font>")
-		t = replacetext(t, "\[list\]", "<ul>")
-		t = replacetext(t, "\[/list\]", "</ul>")
-
-		t = "<font face=\"[deffont]\" color=[P.colour]>[t]</font>"
-	else // If it is a crayon, and he still tries to use these, make them empty!
-		t = replacetext(t, "\[*\]", "")
-		t = replacetext(t, "\[hr\]", "")
-		t = replacetext(t, "\[small\]", "")
-		t = replacetext(t, "\[/small\]", "")
-		t = replacetext(t, "\[list\]", "")
-		t = replacetext(t, "\[/list\]", "")
-
-		t = "<font face=\"[crayonfont]\" color=[P.colour]><b>[t]</b></font>"
-
-//	t = replacetext(t, "#", "") // Junk converted to nothing!
+	return P.Format(user,t)
 
 //Count the fields
 	var/laststart = 1
@@ -237,18 +204,16 @@
 		var/id = href_list["write"]
 		//var/t = strip_html_simple(input(usr, "What text do you wish to add to " + (id=="end" ? "the end of the paper" : "field "+id) + "?", "[name]", null),8192) as message
 		//var/t =  strip_html_simple(input("Enter what you want to write:", "Write", null, null)  as message, MAX_MESSAGE_LEN)
-		var/t =  input("Enter what you want to write:", "Write", null, null)  as message
+		var/t = sanitize(input("Enter what you want to write:", "Write", null, null))  as message
 		var/obj/item/i = usr.get_active_hand() // Check to see if he still got that darn pen, also check if he's using a crayon or pen.
-		var/iscrayon = 0
-		if(!istype(i, /obj/item/weapon/pen))
-			if(!istype(i, /obj/item/toy/crayon))
-				return
-			iscrayon = 1
 
-
-		if((!in_range(src, usr) && loc != usr && !( istype(loc, /obj/item/weapon/clipboard) ) && loc.loc != usr && usr.get_active_hand() != i)) // Some check to see if he's allowed to write
+		// if paper is not in usr, then it must be in a clipboard or folder, which must be in or near usr
+		if(src.loc != usr && !((istype(src.loc, /obj/item/weapon/clipboard) || istype(src.loc, /obj/item/weapon/folder)) && (src.loc.loc == usr || src.loc.Adjacent(usr)) ) )
 			return
 
+		log += "<br />\[[time_stamp()]] [key_name(usr)] added: [t]"
+
+		/* Jesus christ whoever did this is retarded.
 		t = checkhtml(t)
 
 		// check for exploits
@@ -258,9 +223,20 @@
 				log_admin("PAPER: [usr] ([usr.ckey]) tried to use forbidden word in [src]: [bad].")
 				message_admins("PAPER: [usr] ([usr.ckey]) tried to use forbidden word in [src]: [bad].")
 				return
+		*/
+
+
 
 		t = replacetext(t, "\n", "<BR>")
-		t = parsepencode(t, i, usr, iscrayon) // Encode everything from pencode to html
+
+		if(istype(i,/obj/item/weapon/pen))
+			//t = parsepencode(t, i, usr, iscrayon) // Encode everything from pencode to html
+			var/obj/item/weapon/pen/P=i
+			t=P.Format(usr,t)
+
+		else if(istype(i,/obj/item/toy/crayon))
+			var/obj/item/toy/crayon/C=i
+			t=C.Format(usr,t)
 
 		if(id!="end")
 			addtofield(text2num(id), t) // He wants to edit a field, let him.
@@ -271,6 +247,9 @@
 		usr << browse("<HTML><HEAD><TITLE>[name]</TITLE></HEAD><BODY>[info_links][stamps]</BODY></HTML>", "window=[name]") // Update the window
 
 		update_icon()
+
+	if(href_list["help"])
+		openhelp(usr)
 
 
 /obj/item/weapon/paper/attackby(obj/item/weapon/P as obj, mob/user as mob)
@@ -364,4 +343,3 @@
 
 /obj/item/weapon/paper/crumpled/bloody
 	icon_state = "scrap_bloodied"
-
