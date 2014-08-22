@@ -51,7 +51,10 @@ Attach to transfer valve and open. BOOM.
 	if(! (locate(/obj/fire) in T))
 		new /obj/fire(T)
 
-/atom/proc/melt(var/temperature)
+/atom/proc/melt()
+	return //lolidk
+
+/atom/proc/solidify()
 	return //lolidk
 
 /atom/proc/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
@@ -59,10 +62,15 @@ Attach to transfer valve and open. BOOM.
 		ignite(exposed_temperature)
 		return 1
 
-	if(melt_temperature && melt_temperature <= exposed_temperature && !molten && prob(5))
-		molten=1
-		melt()
-		return 1
+	if(melt_temperature)
+		if(melt_temperature <= exposed_temperature && !molten && prob(5))
+			molten=1
+			melt()
+			return 1
+		if(melt_temperature > exposed_temperature && molten && prob(5))
+			molten=0
+			solidify()
+			return 1
 
 	return 0
 
@@ -70,7 +78,6 @@ Attach to transfer valve and open. BOOM.
 	var/soot_type = /obj/effect/decal/cleanable/soot
 
 /turf/simulated/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
-
 	var/obj/effect/E = null
 	if(soot_type)
 		E = locate(soot_type) in src
@@ -344,12 +351,19 @@ datum/gas_mixture/proc/check_recombustability(var/turf/T)
 		if(fuel && QUANTIZE(fuel.moles * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= 0.1)
 			return 1
 
+	// We have to check all objects in order to extinguish object fires.
+	var/still_burning=0
 	for(var/atom/A in T)
-		if(!A || !oxygen || A.autoignition_temperature > temperature) continue // NOTE:
+		if(!A) continue
+		if(!oxygen/* || A.autoignition_temperature > temperature*/)
+			A.extinguish()
+			continue
 		if(QUANTIZE(A.getFireFuel() * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= 0.1)
-			return 1
+			still_burning=1
+		else
+			A.ashify()
 
-	return 0
+	return still_burning
 
 datum/gas_mixture/proc/check_combustability(var/turf/T, var/objects)
 	//this check comes up very often and is thus centralized here to ease adding stuff
@@ -367,7 +381,7 @@ datum/gas_mixture/proc/check_combustability(var/turf/T, var/objects)
 
 	if(objects)
 		for(var/atom/A in T)
-			if(!A || !oxygen || A.autoignition_temperature > temperature) continue // NOTE:
+			if(!A || !oxygen || A.autoignition_temperature > temperature) continue
 			if(QUANTIZE(A.getFireFuel() * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= 0.1)
 				return 1
 
@@ -383,6 +397,8 @@ datum/gas_mixture/proc/calculate_firelevel(var/turf/T)
 	if(check_recombustability(T))
 
 		total_fuel += toxins
+
+		total_fuel += T.getFireFuel()
 
 		for(var/atom/A in T)
 			if(A)
